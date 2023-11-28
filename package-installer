@@ -5,5 +5,11 @@ apt install awscli -y
 
 python3.10 -m pip install dweepy -t python/
 zip -r layer.zip python
-
 aws lambda publish-layer-version --layer-name dweepy-layer --zip-file fileb://layer.zip --compatible-runtimes python3.10 --region ap-southeast-1
+
+rm -rf python
+rm layer.zip
+
+python3.10 -m pip install paho-mqtt -t python/
+zip -r layer.zip python
+aws lambda publish-layer-version --layer-name paho-mqtt-layer --zip-file fileb://layer.zip --compatible-runtimes python3.10 --region ap-southeast-1
