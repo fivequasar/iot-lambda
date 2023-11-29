@@ -4,6 +4,7 @@ import time
 import os
 import random
 from paho.mqtt import client as mqtt_client
+#import apprpriate modules
 
 def lambda_handler(event, context):
     
@@ -13,9 +14,9 @@ def lambda_handler(event, context):
 
     host = "13.212.222.212"; # broker's ip
     
-    port = 1883
+    port = 1883 # broker's port
 
-    topic = "brokerchannel"
+    topic = "brokerchannel" # broker's channel
     
     client_id = f'publish-{random.randint(0, 1000)}'
 
@@ -23,16 +24,15 @@ def lambda_handler(event, context):
 
     mqtt_password = "4640D_password"; # mqtt password that was created on mqtt_server.
 
-    query_air_state  = event['air_state'];
+    query_air_state  = event['air_state']; #air_state's value, stored in variable "query_air_state"
 
-    query_air_read  = event['air_read'];
-
-    query_light_state = event['light_state'];
-
-    query_light_bright = event['light_bright'];
-
+    query_air_read  = event['air_read']; #air_read's value, stored in variable "query_air_read"
     
-    query_air_state_low_cap = query_air_state.lower();
+    query_light_state = event['light_state']; #light_state's value, stored in variable "query_light_state"
+
+    query_light_bright = event['light_bright']; #query_light_bright's value, stored in variable "query_light_bright"
+    
+    query_air_state_low_cap = query_air_state.lower(); #Ensure low capitals for the inputs
 
     query_air_read_num_to_string = str(query_air_read);
     
