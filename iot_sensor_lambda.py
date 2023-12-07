@@ -12,7 +12,7 @@ def lambda_handler(event, context):
 
     link_light = "4640D_light_sensor"; # ensure that when you use IFTT, https://dweet.io/dweet/for/4640D_light_sensor?status=onoff is the url for your web hook application
 
-    host = "13.212.222.212"; # broker's ip
+    host = "52.74.129.244"; # broker's ip
     
     port = 1883 # broker's port
 
@@ -41,14 +41,17 @@ def lambda_handler(event, context):
     query_light_bright_num_to_string = str(query_light_bright);
 
     
-    message = query_air_state_low_cap + " " + query_air_read_num_to_string + " " + query_light_state_low_cap + " " + query_light_bright_num_to_string
-    
-    
     if query_air_state_low_cap == "on":
         
         print("Air-conditioner is on!");
         result = dweepy.dweet_for(link_air, {'status': 'on', 'temp': query_air_read_num_to_string});
         currentAirTimeStamp = result['created'];
+        
+        client = mqtt_client.Client(client_id);
+        client.username_pw_set(mqtt_username, mqtt_password);
+        client.connect(host, port);
+        msg = currentAirTimeStamp + "_aircon_on" + query_air_read_num_to_string;
+        result = client.publish(topic, msg);
         
     elif query_air_state_low_cap == "off":
         
@@ -56,19 +59,40 @@ def lambda_handler(event, context):
         result = dweepy.dweet_for(link_air, {'status': 'off', 'temp': '0'});
         currentAirTimeStamp = result['created'];
         
-
+        client = mqtt_client.Client(client_id);
+        client.username_pw_set(mqtt_username, mqtt_password);
+        client.connect(host, port);
+        msg = currentAirTimeStamp + "_aircon_of0";
+        result = client.publish(topic, msg);
+        
+        
 
     if query_light_state_low_cap == "on":
     
         print("Light is on!");
         result = dweepy.dweet_for(link_light, {'status': 'on', 'brightness': query_light_bright_num_to_string});
         currentLightTimeStamp = result['created'];
+        
+        client = mqtt_client.Client(client_id);
+        client.username_pw_set(mqtt_username, mqtt_password);
+        client.connect(host, port);
+        msg = currentLightTimeStamp + "_lights_on" + query_light_bright_num_to_string;
+        result = client.publish(topic, msg);
+
 
     elif query_light_state_low_cap == "off":
         
         print("Light is off!");
         result = dweepy.dweet_for(link_light, {'status': 'off', 'brightness': '0'});
         currentLightTimeStamp = result['created'];
+        
+        client = mqtt_client.Client(client_id);
+        client.username_pw_set(mqtt_username, mqtt_password);
+        client.connect(host, port);
+        msg = currentLightTimeStamp + "_lights_of0";
+        result = client.publish(topic, msg);
+        
+        
         
     while True:
     
