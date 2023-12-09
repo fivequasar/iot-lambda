@@ -105,7 +105,7 @@ def lambda_handler(event, context):
         for thing in latestDweetAir[0]['content']: #Check if there are changes to temperature | dweet link is https://dweet.io/dweet/for/4640D_air_con_sensor?temp={{NoteText}}
             if thing == "temp":
                 query_air_read_num_to_string = str(latestDweetAir[0]['content']['temp']); 
-                if query_air_read_num_to_string.isdigit():
+                if query_air_read_num_to_string.isdigit(): #Check that the input is a number
                     currentAirTemp = "changed";
                 else:
                     currentAirTemp = "not int";
