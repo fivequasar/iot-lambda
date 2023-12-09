@@ -12,7 +12,7 @@ def lambda_handler(event, context):
 
     link_light = "4640D_light_sensor"; # ensure that when you use IFTT, https://dweet.io/dweet/for/4640D_light_sensor?status=onoff is the url for your web hook application
 
-    host = "52.74.129.244"; # broker's ip
+    host = "44.221.118.197"; # broker's ip
     
     port = 1883 # broker's port
 
@@ -102,30 +102,72 @@ def lambda_handler(event, context):
         latestDweetTimeStampAir = latestDweetAir[0]['created'];
         latestDweetTimeStampLight = latestDweetLight[0]['created'];
         
+        for thing in latestDweetAir[0]['content']: #Check if there are changes to temperature | dweet link is https://dweet.io/dweet/for/4640D_air_con_sensor?temp={{NoteText}}
+            if thing == "temp":
+                query_air_read_num_to_string = str(latestDweetAir[0]['content']['temp']); 
+                if query_air_read_num_to_string.isdigit():
+                    currentAirTemp = "changed";
+                else:
+                    currentAirTemp = "not int";
+            else:
+                currentAirTemp = "unchanged";
+        
+        for thing in latestDweetLight[0]['content']: #Check if there are changes to brightness | dweet link is https://dweet.io/dweet/for/4640D_light_sensor?brightness={{NoteText}}
+            if thing == "brightness":
+                    query_light_bright_num_to_string = str(latestDweetLight[0]['content']['brightness']);
+                    if query_light_bright_num_to_string.isdigit():
+                        currentLightBrightness = "changed";
+                    else:
+                        currentLightBrightness = "not int";
+            else:
+                currentLightBrightness = "unchanged";
+        
         if latestDweetTimeStampAir != currentAirTimeStamp: 
             
             currentAirTimeStamp = latestDweetTimeStampAir
             
-            if query_air_state == "off": 
-                
-                client = mqtt_client.Client(client_id)
-                client.username_pw_set(mqtt_username, mqtt_password)
-                client.connect(host, port)
-                msg = latestDweetTimeStampAir + "_aircon_on" + query_air_read_num_to_string
-                result = client.publish(topic, msg)
-                print(msg)
-                query_air_state = "on"
-    
+            if currentAirTemp == "changed":
             
-            elif query_air_state == "on":
+                if query_air_state == "off": #Change temperature but reading remains off
+                    
+                    client = mqtt_client.Client(client_id)
+                    client.username_pw_set(mqtt_username, mqtt_password)
+                    client.connect(host, port)
+                    msg = latestDweetTimeStampAir + "_aircon_of0"
+                    result = client.publish(topic, msg)
+                    print(msg)
+                    query_air_state = "off"
                 
-                client = mqtt_client.Client(client_id)
-                client.username_pw_set(mqtt_username, mqtt_password)
-                client.connect(host, port)
-                msg = latestDweetTimeStampAir + "_aircon_of0"
-                result = client.publish(topic, msg)
-                print(msg)
-                query_air_state = "off"
+                elif query_air_state == "on": #Change temperature
+                    
+                    client = mqtt_client.Client(client_id)
+                    client.username_pw_set(mqtt_username, mqtt_password)
+                    client.connect(host, port)
+                    msg = latestDweetTimeStampAir + "_aircon_on" + query_air_read_num_to_string
+                    result = client.publish(topic, msg)
+                    print(msg)
+            
+            elif currentAirTemp == "unchanged": 
+                
+                if query_air_state == "off":
+                    
+                    client = mqtt_client.Client(client_id)
+                    client.username_pw_set(mqtt_username, mqtt_password)
+                    client.connect(host, port)
+                    msg = latestDweetTimeStampAir + "_aircon_on" + query_air_read_num_to_string
+                    result = client.publish(topic, msg)
+                    print(msg)
+                    query_air_state = "on"
+                    
+                elif query_air_state == "on":
+                    
+                    client = mqtt_client.Client(client_id)
+                    client.username_pw_set(mqtt_username, mqtt_password)
+                    client.connect(host, port)
+                    msg = latestDweetTimeStampAir + "_aircon_of0"
+                    result = client.publish(topic, msg)
+                    print(msg)
+                    query_air_state = "off"
                 
         time.sleep(1) 
         
@@ -133,27 +175,47 @@ def lambda_handler(event, context):
             
             currentLightTimeStamp = latestDweetTimeStampLight
             
-            if query_light_state == "off": 
-    
-                client = mqtt_client.Client(client_id)
-                client.username_pw_set(mqtt_username, mqtt_password)
-                client.connect(host, port)
-                msg = latestDweetTimeStampLight + "_lights_on" + query_light_bright_num_to_string
-                result = client.publish(topic, msg)
-                print(msg)
-                query_light_state = "on"
-                
-    
+            if currentLightBrightness == "changed":
             
-            elif query_light_state == "on":
-    
-                client = mqtt_client.Client(client_id)
-                client.username_pw_set(mqtt_username, mqtt_password)
-                client.connect(host, port)
-                msg = latestDweetTimeStampLight + "_lights_of0"
-                result = client.publish(topic, msg)
-                print(msg)
-                query_light_state = "off"
+                if query_light_state == "off": #Change brightness but reading remains off
+        
+                    client = mqtt_client.Client(client_id)
+                    client.username_pw_set(mqtt_username, mqtt_password)
+                    client.connect(host, port)
+                    msg = latestDweetTimeStampLight + "_lights_of0"
+                    result = client.publish(topic, msg)
+                    print(msg)
+                    query_light_state = "off"
+                    
+                elif query_light_state == "on":
+        
+                    client = mqtt_client.Client(client_id)
+                    client.username_pw_set(mqtt_username, mqtt_password)
+                    client.connect(host, port)
+                    msg = latestDweetTimeStampLight + "_lights_on" + query_light_bright_num_to_string
+                    result = client.publish(topic, msg)
+                    print(msg)
+            
+            elif currentLightBrightness == "unchanged":
                 
+                if query_light_state == "off": 
+        
+                    client = mqtt_client.Client(client_id)
+                    client.username_pw_set(mqtt_username, mqtt_password)
+                    client.connect(host, port)
+                    msg = latestDweetTimeStampLight + "_lights_on" + query_light_bright_num_to_string
+                    result = client.publish(topic, msg)
+                    print(msg)
+                    query_light_state = "on"
+                    
+                elif query_light_state == "on":
+        
+                    client = mqtt_client.Client(client_id)
+                    client.username_pw_set(mqtt_username, mqtt_password)
+                    client.connect(host, port)
+                    msg = latestDweetTimeStampLight + "_lights_of0" 
+                    result = client.publish(topic, msg)
+                    print(msg)
+                    query_light_state = "off"
         
     time.sleep(1)
